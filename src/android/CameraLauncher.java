@@ -122,7 +122,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
     private boolean orientationCorrected;   // Has the picture's orientation been corrected
     private boolean allowEdit;              // Should we allow the user to crop the image.
 
-    protected final static String[] permissions = { Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE };
+    protected final static String[] permissions = { Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE , Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS };
 
     public CallbackContext callbackContext;
     private int numPics;
@@ -248,6 +248,8 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
         boolean saveAlbumPermission = PermissionHelper.hasPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                 && PermissionHelper.hasPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         boolean takePicturePermission = PermissionHelper.hasPermission(this, Manifest.permission.CAMERA);
+        boolean locationPermission = PermissionHelper.hasPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                && PermissionHelper.hasPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) && PermissionHelper.hasPermission(this, Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS);
 
         // CB-10120: The CAMERA permission does not need to be requested unless it is declared
         // in AndroidManifest.xml. This plugin does not declare it, but others may and so we must
@@ -272,13 +274,8 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
             }
         }
 
-        if (takePicturePermission && saveAlbumPermission) {
+        if (takePicturePermission && saveAlbumPermission && locationPermission) {
             takePicture(returnType, encodingType);
-        } else if (saveAlbumPermission) {
-            PermissionHelper.requestPermission(this, TAKE_PIC_SEC, Manifest.permission.CAMERA);
-        } else if (takePicturePermission) {
-            PermissionHelper.requestPermissions(this, TAKE_PIC_SEC,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE});
         } else {
             PermissionHelper.requestPermissions(this, TAKE_PIC_SEC, permissions);
         }
